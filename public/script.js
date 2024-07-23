@@ -6,6 +6,8 @@ var votesShown = false
 var myVote = 0
 var myName = ''
 var totalUsers = 0
+var votesRegistered = 0
+var votes = []
 
 socket.on('user-connected', (userId, userName) => {
     addUser(userId, userName)
@@ -28,12 +30,27 @@ socket.on('user-disconnected', userId => {
 })
 
 socket.on('show-votes', () => {
-    showVote(socket.id, myVote)
+    votes.push({
+        userId: socket.id,
+        vote: myVote
+    })
+    votesRegistered++
+
     socket.emit('show-vote', socket.id, myVote)
 })
 
 socket.on('show-vote', (userId, vote) => {
-    showVote(userId, vote)
+    votes.push({
+        userId,
+        vote
+    })
+    votesRegistered++
+
+    if (votesRegistered == totalUsers) {
+        votes.forEach(voteEl => {
+            showVote(voteEl.userId, voteEl.vote)
+        })
+    }
 })
 
 socket.on('register-vote', userId => {
@@ -70,13 +87,19 @@ function showVote(userId, value) {
 }
 
 function showValuesBtnHandler() {
+    votes.push({
+        userId: socket.id,
+        vote: myVote
+    })
+    votesRegistered++
     socket.emit('show-votes')
     socket.emit('show-vote', socket.id, myVote)
-    showVote(socket.id, myVote)
 }
 
 function newVote() {
     myVote = 0
+    votesRegistered = 0
+    votes = []
     ivoted = false
     votesShown = false
     for (let i = 0; i < usersGrid.children.length; i++) {
@@ -145,6 +168,6 @@ function addUser(userId, userName) {
     userDiv.append(userVote)
     userDiv.append(userNameP)
     usersGrid.append(userDiv)
-    
+
     totalUsers++
 }
