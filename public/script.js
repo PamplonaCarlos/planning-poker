@@ -5,6 +5,7 @@ var ivoted = false
 var votesShown = false
 var myVote = 0
 var myName = ''
+var totalUsers = 0
 
 socket.on('user-connected', (userId, userName) => {
     addUser(userId, userName)
@@ -21,6 +22,7 @@ socket.on('sync', (userId, userName, userVoted) => {
 socket.on('user-disconnected', userId => {
     const userDiv = document.getElementById(userId)
     if (userDiv) {
+        totalUsers--
         userDiv.remove()
     }
 })
@@ -143,4 +145,6 @@ function addUser(userId, userName) {
     userDiv.append(userVote)
     userDiv.append(userNameP)
     usersGrid.append(userDiv)
+    
+    totalUsers++
 }
